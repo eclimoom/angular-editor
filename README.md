@@ -238,6 +238,8 @@ toolbarHiddenButtons: [
     'link',
     'unlink',
     'insertImage',
+    'insertAudioFile',
+    'insertVideoFile',
     'insertVideo',
     'insertHorizontalRule',
     'removeFormat',

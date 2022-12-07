@@ -172,7 +172,7 @@ export class AngularEditorService {
    * @param imageUrl The imageUrl.
    */
   insertImage(imageUrl: string) {
-    this.doc.execCommand('insertImage', false, imageUrl);
+    this.doc.execCommand('insertImage', true, imageUrl);
   }
 
   setDefaultParagraphSeparator(separator: string) {
@@ -188,12 +188,25 @@ export class AngularEditorService {
     this.insertHtml(newTag);
   }
 
+  insertAudio(videoUrl: string) {
+    const audio = `
+      <audio
+          controls
+          preload="metadata"
+             controlslist='noremoteplayback'
+          src="${videoUrl}">
+      </audio>
+      `;
+    this.insertHtml(audio);
+  }
+
   insertVideo(videoUrl: string) {
     if (videoUrl.match('www.youtube.com')) {
       this.insertYouTubeVideoTag(videoUrl);
-    }
-    if (videoUrl.match('vimeo.com')) {
+    } else if (videoUrl.match('vimeo.com')) {
       this.insertVimeoVideoTag(videoUrl);
+    } else {
+      this.insertSelfVideo(videoUrl);
     }
   }
 
@@ -210,6 +223,17 @@ export class AngularEditorService {
       </div>`;
     this.insertHtml(thumbnail);
   }
+
+  private insertSelfVideo(videoUrl: string) {
+    const thumbnail = `<video
+          preload="metadata"
+          controls
+          src="${videoUrl}"
+          width="300">
+        </video>&nbsp;`;
+    this.insertHtml(thumbnail);
+  }
+
 
   private insertVimeoVideoTag(videoUrl: string): void {
     const sub = this.http.get<any>(`https://vimeo.com/api/oembed.json?url=${videoUrl}`).subscribe(data => {
@@ -249,7 +273,7 @@ export class AngularEditorService {
     } else {
       // Iterate nodes until we hit the end container
       while (node && node !== endNode) {
-        rangeNodes.push( node = this.nextNode(node) );
+        rangeNodes.push(node = this.nextNode(node));
       }
 
       // Add partially selected nodes at the start of the range

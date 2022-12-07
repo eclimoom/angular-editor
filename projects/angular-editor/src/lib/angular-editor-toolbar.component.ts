@@ -1,20 +1,10 @@
-import {
-  Component,
-  ContentChild,
-  ElementRef,
-  EventEmitter,
-  Inject,
-  Input,
-  Output,
-  Renderer2, TemplateRef,
-  ViewChild
-} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Inject, Input, Output, Renderer2, ViewChild} from '@angular/core';
 import {AngularEditorService, UploadResponse} from './angular-editor.service';
-import {HttpResponse, HttpEvent} from '@angular/common/http';
+import {HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
 import {DOCUMENT} from '@angular/common';
 import {CustomClass} from './config';
 import {SelectOption} from './ae-select/ae-select.component';
-import { Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'angular-editor-toolbar',
@@ -326,26 +316,36 @@ export class AngularEditorToolbarComponent {
    */
   onFileChanged(event) {
     const file = event.target.files[0];
-    if (file.type.includes('image/')) {
-        if (this.upload) {
-          this.upload(file).subscribe((response: HttpResponse<UploadResponse>) => this.watchUploadImage(response, event));
-        } else if (this.uploadUrl) {
-            this.editorService.uploadImage(file).subscribe((response: HttpResponse<UploadResponse>) => this.watchUploadImage(response, event));
-        } else {
-          const reader = new FileReader();
-          reader.onload = (e: ProgressEvent) => {
-            const fr = e.currentTarget as FileReader;
-            this.editorService.insertImage(fr.result.toString());
-          };
-          reader.readAsDataURL(file);
-        }
-      }
+    if (this.upload) {
+      this.upload(file).subscribe((response: HttpResponse<UploadResponse>) => this.watchUploadImage(response, event));
+    } else if (this.uploadUrl) {
+      this.editorService.uploadImage(file).subscribe((response: HttpResponse<UploadResponse>) => this.watchUploadImage(response, event));
+    } else if (file.type.includes('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent) => {
+        const fr = e.currentTarget as FileReader;
+        this.editorService.insertImage(fr.result.toString());
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
-  watchUploadImage(response: HttpResponse<{imageUrl: string}>, event) {
-    const { imageUrl } = response.body;
-    this.editorService.insertImage(imageUrl);
+  watchUploadImage(response: HttpResponse<{ imageUrl: string }>, event) {
+    const {imageUrl = ''} = response.body || {};
+    const file = event.target.files[0];
+    if (response.type !== HttpEventType.Response) {
+      return;
+    }
+    const type = file.type.split('/')[0];
+    if (type === 'image') {
+      this.editorService.insertImage(imageUrl);
+    } else if (type === 'audio') {
+      this.editorService.insertAudio(imageUrl);
+    } else if (type === 'video') {
+      this.editorService.insertVideo(imageUrl);
+    }
     event.srcElement.value = null;
+    this.focus();
   }
 
   /**
@@ -380,6 +380,5 @@ export class AngularEditorToolbarComponent {
 
   focus() {
     this.execute.emit('focus');
-    console.log('focused');
   }
 }

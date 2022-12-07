@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AngularEditorConfig } from 'angular-editor';
+import {Observable, throwError} from 'rxjs';
+import {AngularEditorConfig} from "../../../angular-editor/src/lib/config";
+import {HttpClient, HttpEvent, HttpHeaders, HttpRequest, HttpResponse} from "@angular/common/http";
+import {catchError, map} from "rxjs/operators";
 
-const ANGULAR_EDITOR_LOGO_URL = 'https://raw.githubusercontent.com/kolkov/angular-editor/master/docs/angular-editor-logo.png?raw=true'
 
 @Component({
   selector: 'app-root',
@@ -15,8 +17,6 @@ export class AppComponent implements OnInit {
   form: FormGroup;
 
   htmlContent1 = '';
-  htmlContent2 = '';
-  angularEditorLogo = `<img alt="angular editor logo" src="${ANGULAR_EDITOR_LOGO_URL}">`;
 
   config1: AngularEditorConfig = {
     editable: true,
@@ -26,63 +26,76 @@ export class AppComponent implements OnInit {
     placeholder: 'Enter text here...',
     translate: 'no',
     sanitize: false,
-    // toolbarPosition: 'top',
     outline: true,
-    defaultFontName: 'Comic Sans MS',
-    defaultFontSize: '5',
-    // showToolbar: false,
+    // defaultFontName: 'Comic Sans MS',
+    // defaultFontSize: '5',
     defaultParagraphSeparator: 'p',
-    customClasses: [
-      {
-        name: 'quote',
-        class: 'quote',
-      },
-      {
-        name: 'redText',
-        class: 'redText'
-      },
-      {
-        name: 'titleText',
-        class: 'titleText',
-        tag: 'h1',
-      },
-    ],
+    // customClasses: [
+    //   {
+    //     name: 'quote',
+    //     class: 'quote',
+    //   },
+    //   {
+    //     name: 'redText',
+    //     class: 'redText'
+    //   },
+    //   {
+    //     name: 'titleText',
+    //     class: 'titleText',
+    //     tag: 'h1',
+    //   },
+    // ],
     toolbarHiddenButtons: [
-      ['bold', 'italic'],
-      ['fontSize']
-    ]
+      [
+        // 'undo',
+        // 'redo',
+        // 'bold',
+        // 'italic',
+        // 'underline',
+        // 'strikeThrough',
+        // 'subscript',
+        // 'superscript',
+        'justifyLeft',
+        'justifyCenter',
+        'justifyRight',
+        'justifyFull',
+        'indent',
+        'outdent',
+        'insertUnorderedList',
+        'insertOrderedList',
+        'heading',
+        'fontName'
+      ],
+      [
+        'fontSize',
+        // 'textColor',
+        'backgroundColor',
+        // 'customClasses',
+        'link',
+        'unlink',
+        // 'insertImage',
+        'insertVideo',
+        'insertHorizontalRule',
+        // 'removeFormat',
+        'toggleEditorMode',
+      ]
+    ],
+    upload: (file:any) => {
+      return this.uploadWithProgress(file).pipe(
+        map( (event:any) => {  // NOTE: response is of type SomeType
+          if(event instanceof HttpResponse){
+            return {...event, body: {imageUrl: event.body.data}}; // kind of useless
+          }
+          return event;
+        }),
+        catchError( error => {
+          return throwError(error); // From 'rxjs'
+        })
+      );
+    }
   };
 
-  config2: AngularEditorConfig = {
-    editable: true,
-    spellcheck: true,
-    minHeight: '5rem',
-    maxHeight: '15rem',
-    placeholder: 'Enter text here...',
-    translate: 'no',
-    sanitize: true,
-    toolbarPosition: 'bottom',
-    defaultFontName: 'Comic Sans MS',
-    defaultFontSize: '5',
-    defaultParagraphSeparator: 'p',
-    customClasses: [
-      {
-        name: 'quote',
-        class: 'quote',
-      },
-      {
-        name: 'redText',
-        class: 'redText'
-      },
-      {
-        name: 'titleText',
-        class: 'titleText',
-        tag: 'h1',
-      },
-    ]
-  };
-
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(private formBuilder: FormBuilder, private http: HttpClient) {}
 
   ngOnInit() {
     this.form = this.formBuilder.group({
@@ -102,4 +115,17 @@ export class AppComponent implements OnInit {
   onChange2(event) {
     console.warn(this.form.value);
   }
+
+  uploadWithProgress(file: any): Observable<HttpEvent<any>> {
+    const formData: any = new FormData();
+    const headers = new HttpHeaders();
+    headers.set('Content-Type', 'multipart/form-data');
+    formData.append('file', file);
+    const req = new HttpRequest('POST', `/admin/up/image`, formData, {
+      reportProgress: true,
+      responseType: 'json'
+    });
+    return this.http.request(req);
+  }
+
 }

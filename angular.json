@@ -116,7 +116,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "angular-editor-app:build"
+            "browserTarget": "angular-editor-app:build",
+            "proxyConfig": "projects/angular-editor-app/src/proxy.conf.json"
           },
           "configurations": {
             "production": {

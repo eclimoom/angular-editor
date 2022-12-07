@@ -134,10 +134,29 @@
       style="display: none"
       accept="image/*"
       type="file" (change)="onFileChanged($event)"
-      #fileInput>
-    <button [id]="'insertImage-'+id" type="button" class="angular-editor-button" (click)="focus(); fileInput.click()"
-            title="Insert Image"
-            [disabled]="htmlMode" [hidden]="isButtonHidden('insertImage')" tabindex="-1"><i class="fa fa-image"></i>
+      #imageFileInput>
+    <input
+      style="display: none"
+      accept="audio/*"
+      type="file" (change)="onFileChanged($event)"
+      #audioFileInput>
+    <input
+      style="display: none"
+      accept="video/*"
+      type="file" (change)="onFileChanged($event)"
+      #videoFileInput>
+
+    <button [id]="'insertImage-'+id" type="button" class="angular-editor-button" (click)="focus(); imageFileInput.click()"
+            title="插入图片"
+            [disabled]="htmlMode" [hidden]="isButtonHidden('insertImage')" tabindex="-1"><i class="fa fa-file-image-o"></i>
+    </button>
+    <button [id]="'insertAudio-'+id" type="button" class="angular-editor-button" (click)="focus(); audioFileInput.click()"
+            title="插入音频文件"
+            [disabled]="htmlMode" [hidden]="isButtonHidden('insertAudioFile')" tabindex="-1"><i class="fa fa-file-audio-o"></i>
+    </button>
+    <button [id]="'insertVideoFile-'+id" type="button" class="angular-editor-button" (click)="focus(); videoFileInput.click()"
+            title="插入视频文件"
+            [disabled]="htmlMode" [hidden]="isButtonHidden('insertVideoFile')" tabindex="-1"><i class="fa fa-file-video-o"></i>
     </button>
     <button [id]="'insertVideo-'+id" type="button" class="angular-editor-button"
             (click)="insertVideo()" title="Insert Video" [disabled]="htmlMode" [hidden]="isButtonHidden('insertVideo')"
@@ -154,9 +173,9 @@
             tabindex="-1"><i class='fa fa-remove'></i>
     </button>
   </div>
-  <div class="angular-editor-toolbar-set">
+  <div class="angular-editor-toolbar-set" [hidden]="isButtonHidden('toggleEditorMode')">
     <button [id]="'toggleEditorMode-'+id" type="button" title="HTML Code" class="angular-editor-button"
-            (click)="triggerCommand('toggleEditorMode')" [hidden]="isButtonHidden('toggleEditorMode')" tabindex="-1"><i
+            (click)="triggerCommand('toggleEditorMode')"  tabindex="-1"><i
       class='fa fa-code'></i></button>
   </div>
   <ng-content></ng-content>

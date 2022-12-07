@@ -1,0 +1,16 @@
+{
+  "/admin": {
+    "target": "https://test-museum.kuke.com",
+    "secure": false,
+    "pathRewrite": {
+      "^/admin": "/admin"
+    },
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/upload": {
+    "target": "https://test-museum.kuke.com",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
